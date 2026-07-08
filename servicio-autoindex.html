@@ -210,7 +210,7 @@
 
                 <div class="location-box" id="locationBox" onclick="getLocation()">
                     <i class="fas fa-satellite-dish" id="locationIcon"></i>
-                    <p id="locationText">Toca para capturar tu ubicación actual</p>
+                    <p id="locationText">📍 Capturando ubicación automáticamente...</p>
                     <p class="location-text" id="locationAddress" style="display:none;"></p>
                 </div>
 
@@ -382,6 +382,10 @@
                 if(i === num) step.classList.add('active');
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if(num === 2 && !gpsCoords) {
+                setTimeout(getLocation, 500);
+            }
         }
 
         function selectUrgency(urgency, el) {
@@ -471,7 +475,7 @@
             
             icon.className = 'fas fa-satellite-dish';
             icon.style.color = '';
-            text.textContent = 'Toca para capturar tu ubicación actual';
+            text.textContent = '📍 Capturando ubicación automáticamente...';
             address.style.display = 'none';
             box.classList.remove('active');
             
