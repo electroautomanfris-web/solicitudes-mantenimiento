@@ -208,28 +208,28 @@
             <div class="card">
                 <div class="card-title"><i class="fas fa-map-marker-alt"></i> Tu Ubicación</div>
 
-                <div class="location-box" id="locationBox" onclick="toggleLocation()">
-                    <i class="fas fa-location-crosshairs"></i>
-                    <p>Selecciona cómo compartir tu ubicación</p>
-                    <div class="location-options" id="locationOptions" style="display:none;">
-                        <div class="location-opt" onclick="event.stopPropagation();useMyLocation()">
-                            <i class="fas fa-satellite-dish"></i> Mi Ubicación
-                        </div>
-                        <div class="location-opt" onclick="event.stopPropagation();showManual()">
-                            <i class="fas fa-keyboard"></i> Escribir
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label>Dirección <span class="required">*</span></label>
+                    <input type="text" id="address" placeholder="Escribe tu dirección...">
                 </div>
 
-                <div id="manualLocation" style="display:none;margin-top:12px;">
-                    <div class="form-group">
-                        <label>Dirección <span class="required">*</span></label>
-                        <input type="text" id="address" placeholder="Calle, Número, Ciudad...">
-                    </div>
-                    <div class="form-group">
-                        <label>Referencia</label>
-                        <input type="text" id="reference" placeholder="Ej: Frente a Oxxo...">
-                    </div>
+                <div class="form-group">
+                    <label>Referencia</label>
+                    <input type="text" id="reference" placeholder="Ej: Frente a Oxxo...">
+                </div>
+
+                <a href="https://www.google.com/maps/search/?api=1&query=" target="_blank" 
+                   style="display:block;text-align:center;padding:12px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);border-radius:10px;color:#25D366;text-decoration:none;font-size:13px;margin-top:8px;">
+                    <i class="fas fa-external-link-alt"></i> Abrir Google Maps para buscar ubicación
+                </a>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-calendar-alt"></i> Fecha y Hora</div>
+                <div class="form-group">
+                    <label>Fecha y Hora de la Solicitud</label>
+                    <input type="text" id="requestDateTime" readonly 
+                           style="background:rgba(37,211,102,0.05);border-color:rgba(37,211,102,0.2);color:#25D366;">
                 </div>
             </div>
 
@@ -292,7 +292,19 @@
 
     <script>
         let selectedUrgency = '';
-        let gpsCoords = null;
+
+        function getCurrentDateTime() {
+            const now = new Date();
+            const options = { 
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            };
+            return now.toLocaleDateString('es-ES', options);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('requestDateTime').value = getCurrentDateTime();
+        });
 
         function goToSection(num) {
             if(num === 2) {
@@ -329,30 +341,9 @@
             document.getElementById('sumProblem').textContent = document.getElementById('description').value;
             const urgMap = { normal: '🟢 Normal', urgente: '🟡 Urgente', muy_urgente: '🔴 Muy Urgente' };
             document.getElementById('sumUrgency').textContent = urgMap[selectedUrgency];
-            document.getElementById('sumLocation').textContent = document.getElementById('address').value || '📍 GPS capturada';
+            document.getElementById('sumLocation').textContent = document.getElementById('address').value || 'No especificada';
             document.getElementById('sumClient').textContent = document.getElementById('clientName').value;
             document.getElementById('sumPhone').textContent = document.getElementById('clientPhone').value;
-        }
-
-        function toggleLocation() {
-            const o = document.getElementById('locationOptions');
-            o.style.display = o.style.display === 'none' ? 'flex' : 'none';
-        }
-
-        function useMyLocation() {
-            if(navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    gpsCoords = `${pos.coords.latitude}, ${pos.coords.longitude}`;
-                    document.getElementById('locationBox').classList.add('active');
-                    document.getElementById('locationBox').innerHTML = `<i class="fas fa-check-circle" style="color:#25D366;"></i><p class="location-text">Ubicación capturada: ${gpsCoords}</p>`;
-                }, () => alert('No se pudo obtener la ubicación'));
-            }
-        }
-
-        function showManual() {
-            document.getElementById('manualLocation').style.display = 'block';
-            document.getElementById('locationBox').classList.add('active');
-            document.getElementById('locationBox').innerHTML = `<i class="fas fa-check-circle" style="color:#25D366;"></i><p class="location-text">Escribe tu dirección abajo</p>`;
         }
 
         async function sendWhatsApp() {
@@ -362,15 +353,17 @@
                 year: document.getElementById('year').value,
                 description: document.getElementById('description').value,
                 urgency: selectedUrgency,
-                location: gpsCoords || document.getElementById('address').value || 'No especificada',
+                location: document.getElementById('address').value || 'No especificada',
                 reference: document.getElementById('reference').value,
                 clientName: document.getElementById('clientName').value,
-                clientPhone: document.getElementById('clientPhone').value
+                clientPhone: document.getElementById('clientPhone').value,
+                dateTime: document.getElementById('requestDateTime').value
             };
 
             const urgMap = { normal: 'Normal', urgente: 'Urgente', muy_urgente: 'MUY URGENTE' };
 
             let msg = `🔧 *SOLICITUD DE SERVICIO*\n\n`;
+            msg += `📅 *Fecha:* ${data.dateTime}\n`;
             msg += `🚗 *Vehículo:* ${data.brand} ${data.model} ${data.year}\n`;
             msg += `📝 *Problema:* ${data.description}\n`;
             msg += `⚡ *Urgencia:* ${urgMap[data.urgency]}\n`;
@@ -407,13 +400,9 @@
 
         function startOver() {
             selectedUrgency = '';
-            gpsCoords = null;
             document.querySelectorAll('input, textarea, select').forEach(el => el.value = '');
             document.querySelectorAll('.urgency-btn').forEach(b => b.classList.remove('selected'));
-            document.getElementById('manualLocation').style.display = 'none';
-            document.getElementById('locationBox').classList.remove('active');
-            document.getElementById('locationBox').innerHTML = `<i class="fas fa-location-crosshairs"></i><p>Selecciona cómo compartir tu ubicación</p><div class="location-options" id="locationOptions" style="display:none;"><div class="location-opt" onclick="event.stopPropagation();useMyLocation()"><i class="fas fa-satellite-dish"></i> Mi Ubicación</div><div class="location-opt" onclick="event.stopPropagation();showManual()"><i class="fas fa-keyboard"></i> Escribir</div></div>`;
-            document.getElementById('locationOptions').style.display = 'none';
+            document.getElementById('requestDateTime').value = getCurrentDateTime();
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById('section1').classList.add('active');
             document.getElementById('step1').classList.add('active');
