@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio Automotor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 480px; margin: 0 auto; padding: 20px; min-height: 100vh; }
+        .header { text-align: center; padding: 25px 0; }
+        .logo {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px; font-size: 30px;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+        }
+        .header h1 {
+            font-size: 20px; font-weight: 700;
+            background: linear-gradient(90deg, #25D366, #128C7E);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header p { color: #8892b0; font-size: 13px; margin-top: 4px; }
+        .steps { display: flex; justify-content: center; gap: 8px; margin: 15px 0 25px; }
+        .step { width: 40px; height: 4px; background: #2a2a3e; border-radius: 2px; transition: 0.3s; }
+        .step.active { background: #25D366; width: 60px; }
+        .step.completed { background: #128C7E; }
+        .card {
+            background: rgba(26, 26, 46, 0.8); backdrop-filter: blur(20px);
+            border: 1px solid rgba(37, 211, 102, 0.1); border-radius: 20px;
+            padding: 22px; margin-bottom: 18px;
+        }
+        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+        .card-title i { color: #25D366; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 500; color: #8892b0; margin-bottom: 5px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 13px 15px;
+            background: rgba(15, 15, 30, 0.8); border: 1px solid rgba(37, 211, 102, 0.2);
+            border-radius: 12px; color: #fff; font-size: 14px; font-family: 'Inter', sans-serif;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: #25D366; box-shadow: 0 0 15px rgba(37, 211, 102, 0.15);
+        }
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2325D366' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+        }
+        .form-group select option { background: #1a1a2e; color: #fff; }
+        .required { color: #ff6b6b; }
+        .btn {
+            width: 100%; padding: 15px; border: none; border-radius: 14px;
+            font-size: 15px; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 35px rgba(37, 211, 102, 0.4); }
+        .btn-secondary { background: rgba(37, 211, 102, 0.1); border: 1px solid rgba(37, 211, 102, 0.3); color: #25D366; }
+        .btn-back { background: transparent; color: #8892b0; margin-bottom: 8px; }
+        .section { display: none; }
+        .section.active { display: block; animation: fadeInUp 0.5s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .chat-bubble {
+            background: rgba(37, 211, 102, 0.1); border-radius: 16px 16px 16px 4px;
+            padding: 14px; margin-bottom: 18px; border-left: 3px solid #25D366;
+        }
+        .chat-bubble p { font-size: 13px; line-height: 1.6; color: #ccd6f6; }
+        .location-box {
+            background: rgba(37, 211, 102, 0.05); border: 2px dashed rgba(37, 211, 102, 0.3);
+            border-radius: 16px; padding: 18px; text-align: center; cursor: pointer; transition: 0.3s;
+        }
+        .location-box:hover { border-color: #25D366; background: rgba(37, 211, 102, 0.1); }
+        .location-box.active { border-style: solid; border-color: #25D366; }
+        .location-box i { font-size: 28px; color: #25D366; margin-bottom: 8px; display: block; }
+        .location-box p { font-size: 12px; color: #8892b0; }
+        .location-box .location-text { color: #25D366; font-weight: 500; margin-top: 8px; font-size: 13px; }
+        .location-options { display: flex; gap: 8px; margin-top: 12px; }
+        .location-opt {
+            flex: 1; padding: 10px; background: rgba(15, 15, 30, 0.8);
+            border: 1px solid rgba(37, 211, 102, 0.2); border-radius: 10px;
+            text-align: center; cursor: pointer; font-size: 11px; color: #fff;
+        }
+        .location-opt:hover { border-color: #25D366; background: rgba(37, 211, 102, 0.1); }
+        .location-opt i { font-size: 18px; color: #25D366; margin-bottom: 4px; display: block; }
+        .urgency-options { display: flex; gap: 8px; }
+        .urgency-btn {
+            flex: 1; padding: 10px; background: rgba(15, 15, 30, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
+            text-align: center; cursor: pointer; font-size: 12px; color: #fff;
+        }
+        .urgency-btn:hover { border-color: #25D366; }
+        .urgency-btn.selected { border-color: #25D366; background: rgba(37, 211, 102, 0.15); }
+        .urgency-btn i { display: block; font-size: 16px; margin-bottom: 3px; }
+        .summary-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .summary-item:last-child { border-bottom: none; }
+        .summary-label { color: #8892b0; font-size: 12px; }
+        .summary-value { font-weight: 500; font-size: 13px; }
+        .success-icon {
+            width: 90px; height: 90px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px; font-size: 40px;
+            animation: bounceIn 0.8s ease;
+        }
+        @keyframes bounceIn { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        .success-title { text-align: center; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .success-msg { text-align: center; color: #8892b0; font-size: 13px; line-height: 1.6; }
+        .badge { display: inline-block; background: rgba(37,211,102,0.15); color: #25D366; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; margin-left: 6px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo"><i class="fas fa-wrench"></i></div>
+            <h1>AutoServicio Express</h1>
+            <p>Reparación y Mantenimiento Vehicular</p>
+        </div>
+
+        <div class="steps">
+            <div class="step active" id="step1"></div>
+            <div class="step" id="step2"></div>
+            <div class="step" id="step3"></div>
+        </div>
+
+        <!-- PASO 1: Vehículo -->
+        <div class="section active" id="section1">
+            <div class="chat-bubble">
+                <p>Completa los datos de tu vehículo 🚗</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-car"></i> Datos del Vehículo</div>
+
+                <div class="form-group">
+                    <label>Marca <span class="required">*</span></label>
+                    <select id="brand" required>
+                        <option value="">Seleccionar marca...</option>
+                        <option>Toyota</option><option>Honda</option><option>Ford</option>
+                        <option>Chevrolet</option><option>Hyundai</option><option>Nissan</option>
+                        <option>Kia</option><option>Mazda</option><option>Volkswagen</option>
+                        <option>BMW</option><option>Mercedes-Benz</option><option>Audi</option>
+                        <option>Mitsubishi</option><option>Suzuki</option><option>Subaru</option>
+                        <option>Jeep</option><option>Dodge</option><option>Isuzu</option><option>Otro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Modelo <span class="required">*</span></label>
+                    <input type="text" id="model" placeholder="Ej: Corolla, Civic, Spark...">
+                </div>
+
+                <div class="form-group">
+                    <label>Año <span class="required">*</span></label>
+                    <select id="year" required>
+                        <option value="">Año...</option>
+                        <script>for(let y=2026;y>=1990;y--) document.write(`<option value="${y}">${y}</option>`);</script>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="goToSection(2)">Continuar <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <!-- PASO 2: Problema y Ubicación -->
+        <div class="section" id="section2">
+            <button class="btn btn-back" onclick="goToSection(1)"><i class="fas fa-arrow-left"></i> Volver</button>
+
+            <div class="chat-bubble">
+                <p>Describe el problema y déjame tu ubicación 📍</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-clipboard-list"></i> Problema</div>
+
+                <div class="form-group">
+                    <label>¿Qué problema presentas? <span class="required">*</span></label>
+                    <textarea id="description" rows="3" placeholder="Describe el problema..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Urgencia <span class="required">*</span></label>
+                    <div class="urgency-options">
+                        <div class="urgency-btn" onclick="selectUrgency('normal', this)">
+                            <i class="fas fa-clock" style="color:#25D366;"></i> Normal
+                        </div>
+                        <div class="urgency-btn" onclick="selectUrgency('urgente', this)">
+                            <i class="fas fa-exclamation-circle" style="color:#f39c12;"></i> Urgente
+                        </div>
+                        <div class="urgency-btn" onclick="selectUrgency('muy_urgente', this)">
+                            <i class="fas fa-bolt" style="color:#e74c3c;"></i> Muy Urgente
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-map-marker-alt"></i> Tu Ubicación</div>
+
+                <div class="location-box" id="locationBox" onclick="toggleLocation()">
+                    <i class="fas fa-location-crosshairs"></i>
+                    <p>Selecciona cómo compartir tu ubicación</p>
+                    <div class="location-options" id="locationOptions" style="display:none;">
+                        <div class="location-opt" onclick="event.stopPropagation();useMyLocation()">
+                            <i class="fas fa-satellite-dish"></i> Mi Ubicación
+                        </div>
+                        <div class="location-opt" onclick="event.stopPropagation();showManual()">
+                            <i class="fas fa-keyboard"></i> Escribir
+                        </div>
+                    </div>
+                </div>
+
+                <div id="manualLocation" style="display:none;margin-top:12px;">
+                    <div class="form-group">
+                        <label>Dirección <span class="required">*</span></label>
+                        <input type="text" id="address" placeholder="Calle, Número, Ciudad...">
+                    </div>
+                    <div class="form-group">
+                        <label>Referencia</label>
+                        <input type="text" id="reference" placeholder="Ej: Frente a Oxxo...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-user"></i> Tus Datos</div>
+
+                <div class="form-group">
+                    <label>Nombre Completo <span class="required">*</span></label>
+                    <input type="text" id="clientName" placeholder="Tu nombre">
+                </div>
+
+                <div class="form-group">
+                    <label>Teléfono / WhatsApp <span class="required">*</span></label>
+                    <input type="tel" id="clientPhone" placeholder="Ej: +1 (809) 555-1234">
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="goToSection(3)">
+                <i class="fab fa-whatsapp"></i> Enviar por WhatsApp
+            </button>
+        </div>
+
+        <!-- PASO 3: Resumen y Envío -->
+        <div class="section" id="section3">
+            <button class="btn btn-back" onclick="goToSection(2)"><i class="fas fa-arrow-left"></i> Volver</button>
+
+            <div class="chat-bubble">
+                <p>Revisa tu solicitud antes de enviar 📋</p>
+            </div>
+
+            <div class="card">
+                <div class="card-title"><i class="fas fa-file-invoice"></i> Resumen</div>
+                <div class="summary-item"><span class="summary-label">Vehículo</span><span class="summary-value" id="sumVehicle">-</span></div>
+                <div class="summary-item"><span class="summary-label">Problema</span><span class="summary-value" id="sumProblem">-</span></div>
+                <div class="summary-item"><span class="summary-label">Urgencia</span><span class="summary-value" id="sumUrgency">-</span></div>
+                <div class="summary-item"><span class="summary-label">Ubicación</span><span class="summary-value" id="sumLocation">-</span></div>
+                <div class="summary-item"><span class="summary-label">Cliente</span><span class="summary-value" id="sumClient">-</span></div>
+                <div class="summary-item"><span class="summary-label">Contacto</span><span class="summary-value" id="sumPhone">-</span></div>
+            </div>
+
+            <button class="btn btn-primary" onclick="sendWhatsApp()" id="sendBtn">
+                <i class="fab fa-whatsapp"></i> Enviar Solicitud
+            </button>
+
+            <div style="text-align:center;margin-top:12px;">
+                <button class="btn btn-secondary" onclick="startOver()"><i class="fas fa-redo"></i> Nueva Solicitud</button>
+            </div>
+        </div>
+
+        <!-- ÉXITO -->
+        <div class="section" id="sectionSuccess">
+            <div class="success-icon"><i class="fas fa-check"></i></div>
+            <h2 class="success-title">¡Solicitud Enviada!</h2>
+            <p class="success-msg">Tu solicitud fue enviada por WhatsApp.<br>Nos pondremos en contacto contigo pronto.</p>
+            <div style="text-align:center;margin-top:25px;">
+                <button class="btn btn-secondary" onclick="startOver()"><i class="fas fa-redo"></i> Nueva Solicitud</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedUrgency = '';
+        let gpsCoords = null;
+
+        function goToSection(num) {
+            if(num === 2) {
+                if(!document.getElementById('brand').value) { alert('Selecciona la marca'); return; }
+                if(!document.getElementById('model').value) { alert('Ingresa el modelo'); return; }
+                if(!document.getElementById('year').value) { alert('Selecciona el año'); return; }
+            }
+            if(num === 3) {
+                if(!document.getElementById('description').value) { alert('Describe el problema'); return; }
+                if(!selectedUrgency) { alert('Selecciona la urgencia'); return; }
+                if(!document.getElementById('clientName').value) { alert('Ingresa tu nombre'); return; }
+                if(!document.getElementById('clientPhone').value) { alert('Ingresa tu teléfono'); return; }
+                fillSummary();
+            }
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(num === 'success' ? 'sectionSuccess' : 'section' + num).classList.add('active');
+            for(let i = 1; i <= 3; i++) {
+                const step = document.getElementById('step' + i);
+                step.classList.remove('active', 'completed');
+                if(i < num) step.classList.add('completed');
+                if(i === num) step.classList.add('active');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectUrgency(urgency, el) {
+            selectedUrgency = urgency;
+            document.querySelectorAll('.urgency-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function fillSummary() {
+            document.getElementById('sumVehicle').textContent = `${document.getElementById('brand').value} ${document.getElementById('model').value} ${document.getElementById('year').value}`;
+            document.getElementById('sumProblem').textContent = document.getElementById('description').value;
+            const urgMap = { normal: '🟢 Normal', urgente: '🟡 Urgente', muy_urgente: '🔴 Muy Urgente' };
+            document.getElementById('sumUrgency').textContent = urgMap[selectedUrgency];
+            document.getElementById('sumLocation').textContent = document.getElementById('address').value || '📍 GPS capturada';
+            document.getElementById('sumClient').textContent = document.getElementById('clientName').value;
+            document.getElementById('sumPhone').textContent = document.getElementById('clientPhone').value;
+        }
+
+        function toggleLocation() {
+            const o = document.getElementById('locationOptions');
+            o.style.display = o.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function useMyLocation() {
+            if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    gpsCoords = `${pos.coords.latitude}, ${pos.coords.longitude}`;
+                    document.getElementById('locationBox').classList.add('active');
+                    document.getElementById('locationBox').innerHTML = `<i class="fas fa-check-circle" style="color:#25D366;"></i><p class="location-text">Ubicación capturada: ${gpsCoords}</p>`;
+                }, () => alert('No se pudo obtener la ubicación'));
+            }
+        }
+
+        function showManual() {
+            document.getElementById('manualLocation').style.display = 'block';
+            document.getElementById('locationBox').classList.add('active');
+            document.getElementById('locationBox').innerHTML = `<i class="fas fa-check-circle" style="color:#25D366;"></i><p class="location-text">Escribe tu dirección abajo</p>`;
+        }
+
+        async function sendWhatsApp() {
+            const data = {
+                brand: document.getElementById('brand').value,
+                model: document.getElementById('model').value,
+                year: document.getElementById('year').value,
+                description: document.getElementById('description').value,
+                urgency: selectedUrgency,
+                location: gpsCoords || document.getElementById('address').value || 'No especificada',
+                reference: document.getElementById('reference').value,
+                clientName: document.getElementById('clientName').value,
+                clientPhone: document.getElementById('clientPhone').value
+            };
+
+            const urgMap = { normal: 'Normal', urgente: 'Urgente', muy_urgente: 'MUY URGENTE' };
+
+            let msg = `🔧 *SOLICITUD DE SERVICIO*\n\n`;
+            msg += `🚗 *Vehículo:* ${data.brand} ${data.model} ${data.year}\n`;
+            msg += `📝 *Problema:* ${data.description}\n`;
+            msg += `⚡ *Urgencia:* ${urgMap[data.urgency]}\n`;
+            msg += `📍 *Ubicación:* ${data.location}\n`;
+            if(data.reference) msg += `📌 *Ref:* ${data.reference}\n`;
+            msg += `\n👤 *Nombre:* ${data.clientName}\n`;
+            msg += `📱 *Teléfono:* ${data.clientPhone}`;
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            try {
+                const res = await fetch('/api/send-request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+                if(result.success) {
+                    document.getElementById('sectionSuccess').classList.add('active');
+                    document.querySelectorAll('.section:not(#sectionSuccess)').forEach(s => s.classList.remove('active'));
+                } else { throw new Error(); }
+            } catch(e) {
+                const phone = '18095551234';
+                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.getElementById('sectionSuccess').classList.add('active');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fab fa-whatsapp"></i> Enviar Solicitud';
+            }
+        }
+
+        function startOver() {
+            selectedUrgency = '';
+            gpsCoords = null;
+            document.querySelectorAll('input, textarea, select').forEach(el => el.value = '');
+            document.querySelectorAll('.urgency-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('manualLocation').style.display = 'none';
+            document.getElementById('locationBox').classList.remove('active');
+            document.getElementById('locationBox').innerHTML = `<i class="fas fa-location-crosshairs"></i><p>Selecciona cómo compartir tu ubicación</p><div class="location-options" id="locationOptions" style="display:none;"><div class="location-opt" onclick="event.stopPropagation();useMyLocation()"><i class="fas fa-satellite-dish"></i> Mi Ubicación</div><div class="location-opt" onclick="event.stopPropagation();showManual()"><i class="fas fa-keyboard"></i> Escribir</div></div>`;
+            document.getElementById('locationOptions').style.display = 'none';
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('section1').classList.add('active');
+            document.getElementById('step1').classList.add('active');
+            document.getElementById('step2').classList.remove('active','completed');
+            document.getElementById('step3').classList.remove('active','completed');
+            window.scrollTo({ top: 0 });
+        }
+    </script>
+</body>
+</html>
