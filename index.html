@@ -208,20 +208,21 @@
             <div class="card">
                 <div class="card-title"><i class="fas fa-map-marker-alt"></i> Tu Ubicación</div>
 
-                <div class="form-group">
+                <div class="location-box" id="locationBox" onclick="getLocation()">
+                    <i class="fas fa-satellite-dish" id="locationIcon"></i>
+                    <p id="locationText">Toca para capturar tu ubicación actual</p>
+                    <p class="location-text" id="locationAddress" style="display:none;"></p>
+                </div>
+
+                <div class="form-group" style="margin-top:12px;">
                     <label>Dirección <span class="required">*</span></label>
-                    <input type="text" id="address" placeholder="Escribe tu dirección...">
+                    <input type="text" id="address" placeholder="Se capturará automáticamente...">
                 </div>
 
                 <div class="form-group">
                     <label>Referencia</label>
                     <input type="text" id="reference" placeholder="Ej: Frente a Oxxo...">
                 </div>
-
-                <a href="https://www.google.com/maps/search/?api=1&query=" target="_blank" 
-                   style="display:block;text-align:center;padding:12px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);border-radius:10px;color:#25D366;text-decoration:none;font-size:13px;margin-top:8px;">
-                    <i class="fas fa-external-link-alt"></i> Abrir Google Maps para buscar ubicación
-                </a>
             </div>
 
             <div class="card">
@@ -292,6 +293,7 @@
 
     <script>
         let selectedUrgency = '';
+        let gpsCoords = null;
 
         function getCurrentDateTime() {
             const now = new Date();
@@ -305,6 +307,58 @@
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('requestDateTime').value = getCurrentDateTime();
         });
+
+        function getLocation() {
+            const box = document.getElementById('locationBox');
+            const icon = document.getElementById('locationIcon');
+            const text = document.getElementById('locationText');
+            const address = document.getElementById('locationAddress');
+
+            if (!navigator.geolocation) {
+                alert('Tu navegador no soporta geolocalización');
+                return;
+            }
+
+            icon.className = 'fas fa-spinner fa-spin';
+            text.textContent = 'Buscando tu ubicación...';
+
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    gpsCoords = `${lat}, ${lon}`;
+
+                    try {
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`);
+                        const data = await response.json();
+                        
+                        let fullAddress = data.display_name || `${lat}, ${lon}`;
+                        document.getElementById('address').value = fullAddress;
+
+                        icon.className = 'fas fa-check-circle';
+                        icon.style.color = '#25D366';
+                        text.textContent = 'Ubicación capturada';
+                        address.textContent = fullAddress;
+                        address.style.display = 'block';
+                        box.classList.add('active');
+                    } catch (e) {
+                        document.getElementById('address').value = `${lat}, ${lon}`;
+                        icon.className = 'fas fa-check-circle';
+                        icon.style.color = '#25D366';
+                        text.textContent = 'Coordenadas capturadas';
+                        address.textContent = `${lat}, ${lon}`;
+                        address.style.display = 'block';
+                        box.classList.add('active');
+                    }
+                },
+                (error) => {
+                    icon.className = 'fas fa-exclamation-circle';
+                    icon.style.color = '#f39c12';
+                    text.textContent = 'No se pudo obtener ubicación. Escribe manualmente.';
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
 
         function goToSection(num) {
             if(num === 2) {
@@ -367,7 +421,12 @@
             msg += `🚗 *Vehículo:* ${data.brand} ${data.model} ${data.year}\n`;
             msg += `📝 *Problema:* ${data.description}\n`;
             msg += `⚡ *Urgencia:* ${urgMap[data.urgency]}\n`;
-            msg += `📍 *Ubicación:* ${data.location}\n`;
+            if(gpsCoords) {
+                const [lat, lon] = gpsCoords.split(', ');
+                msg += `📍 *Ubicación:* https://www.google.com/maps?q=${lat},${lon}\n`;
+            } else {
+                msg += `📍 *Ubicación:* ${data.location}\n`;
+            }
             if(data.reference) msg += `📌 *Ref:* ${data.reference}\n`;
             msg += `\n👤 *Nombre:* ${data.clientName}\n`;
             msg += `📱 *Teléfono:* ${data.clientPhone}`;
@@ -400,9 +459,22 @@
 
         function startOver() {
             selectedUrgency = '';
+            gpsCoords = null;
             document.querySelectorAll('input, textarea, select').forEach(el => el.value = '');
             document.querySelectorAll('.urgency-btn').forEach(b => b.classList.remove('selected'));
             document.getElementById('requestDateTime').value = getCurrentDateTime();
+            
+            const box = document.getElementById('locationBox');
+            const icon = document.getElementById('locationIcon');
+            const text = document.getElementById('locationText');
+            const address = document.getElementById('locationAddress');
+            
+            icon.className = 'fas fa-satellite-dish';
+            icon.style.color = '';
+            text.textContent = 'Toca para capturar tu ubicación actual';
+            address.style.display = 'none';
+            box.classList.remove('active');
+            
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById('section1').classList.add('active');
             document.getElementById('step1').classList.add('active');
