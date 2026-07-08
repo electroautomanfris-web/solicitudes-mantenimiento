@@ -1,0 +1,19 @@
+{
+  "whatsapp": {
+    "phoneNumberId": "TU_PHONE_NUMBER_ID",
+    "accessToken": "TU_ACCESS_TOKEN",
+    "businessAccountId": "TU_BUSINESS_ACCOUNT_ID",
+    "apiVersion": "v21.0"
+  },
+  "server": {
+    "port": 3000,
+    "host": "0.0.0.0"
+  },
+  "business": {
+    "name": "AutoServicio Express",
+    "phone": "18095551234",
+    "address": "Tu dirección aquí",
+    "welcomeTemplate": "hola_bienvenida",
+    "confirmTemplate": "confirmacion_solicitud"
+  }
+}
